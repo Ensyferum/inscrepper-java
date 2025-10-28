@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: layout(~{::title}, ~{::content})">
+<head>
+    <title>Home - Inscrepper</title>
+</head>
+<body>
+<div th:fragment="content">
+    <!-- Hero Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-camera-reels display-1 text-primary"></i>
+                </div>
+                <h1 class="display-4 fw-bold text-dark mb-3">Bem-vindo ao Inscrepper</h1>
+                <p class="lead text-muted mb-4">
+                    Monitore perfis do Instagram de forma simples e eficiente. 
+                    API e painel administrativo integrados em uma única aplicação Spring Boot.
+                </p>
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="/profiles" class="btn btn-primary btn-lg px-4 me-2">
+                        <i class="bi bi-people me-2"></i>Ver Perfis
+                    </a>
+                    <a href="/admin" class="btn btn-outline-primary btn-lg px-4 me-2">
+                        <i class="bi bi-gear me-2"></i>Acessar Admin
+                    </a>
+                    <a href="#features" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="bi bi-info-circle me-2"></i>Saiba Mais
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div id="features" class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-search display-4 text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Monitoramento</h5>
+                    <p class="card-text text-muted">
+                        Monitore múltiplos perfis do Instagram automaticamente 
+                        e mantenha seus dados sempre atualizados.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-graph-up display-4 text-success"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Analytics</h5>
+                    <p class="card-text text-muted">
+                        Colete e analise dados de conteúdo com ferramentas 
+                        integradas para relatórios detalhados.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-shield-check display-4 text-warning"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Segurança</h5>
+                    <p class="card-text text-muted">
+                        Sistema seguro e confiável com controle de acesso 
+                        e armazenamento protegido de dados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body p-4">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="py-2">
+                                <i class="bi bi-people-fill display-6 mb-2"></i>
+                                <h4 class="fw-bold mb-0" th:text="${profiles != null ? profiles.size() : 0}">0</h4>
+                                <p class="mb-0">Perfis Monitorados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="py-2">
+                                <i class="bi bi-clock-history display-6 mb-2"></i>
+                                <h4 class="fw-bold mb-0">24/7</h4>
+                                <p class="mb-0">Monitoramento</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="py-2">
+                                <i class="bi bi-lightning-charge-fill display-6 mb-2"></i>
+                                <h4 class="fw-bold mb-0">Rápido</h4>
+                                <p class="mb-0">Processamento</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-6">
+            <div class="text-center">
+                <h3 class="fw-bold mb-3">Primeiros Passos</h3>
+                <p class="text-muted mb-4">
+                    Comece adicionando um perfil para monitoramento no painel administrativo.
+                </p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="/admin" class="btn btn-success btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Adicionar Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

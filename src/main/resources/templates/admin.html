@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout/base :: layout(~{::title}, ~{::content})">
+<head>
+    <title>Admin - Inscrepper</title>
+</head>
+<body>
+<div th:fragment="content">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="display-6 fw-bold text-dark mb-2">
+                        <i class="bi bi-gear me-3 text-primary"></i>Painel Administrativo
+                    </h1>
+                    <p class="text-muted mb-0">Gerencie perfis monitorados pelo sistema de scraping</p>
+                </div>
+                <div>
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${error}">Erro</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Add Profile Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>Adicionar Novo Perfil
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="/admin/profiles" class="needs-validation" novalidate>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-semibold">
+                                    <i class="bi bi-at me-1"></i>Username do Instagram
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="username" 
+                                       name="username" 
+                                       placeholder="ex: oncallpeds" 
+                                       required>
+                                <div class="form-text">
+                                    Digite o username sem o símbolo @
+                                </div>
+                                <div class="invalid-feedback">
+                                    Por favor, insira um username válido.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="displayName" class="form-label fw-semibold">
+                                    <i class="bi bi-person me-1"></i>Nome de Exibição
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="displayName" 
+                                       name="displayName" 
+                                       placeholder="ex: On Call Pediatrics">
+                                <div class="form-text">
+                                    Nome amigável para exibição (opcional)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="bi bi-plus-lg me-2"></i>Adicionar Perfil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card bg-light border-0 h-100">
+                <div class="card-body p-4">
+                    <h6 class="card-title fw-bold">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>Dicas
+                    </h6>
+                    <ul class="list-unstyled mb-0 small text-muted">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Use apenas o username, sem @
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            O perfil deve ser público
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Nome de exibição é opcional
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Monitoramento inicia automaticamente
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profiles List Section -->
+    <div class="row">
+        <div class="col">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul me-2"></i>Perfis Monitorados
+                    </h5>
+                    <span class="badge bg-light text-dark" th:text="${profiles != null ? profiles.size() : 0}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="px-4">
+                                        <i class="bi bi-hash me-1"></i>ID
+                                    </th>
+                                    <th scope="col">
+                                        <i class="bi bi-at me-1"></i>Username
+                                    </th>
+                                    <th scope="col">
+                                        <i class="bi bi-person me-1"></i>Nome
+                                    </th>
+                                    <th scope="col" class="text-center">
+                                        <i class="bi bi-activity me-1"></i>Status
+                                    </th>
+                                    <th scope="col">
+                                        <i class="bi bi-calendar me-1"></i>Criado
+                                    </th>
+                                    <th scope="col" class="text-center">
+                                        <i class="bi bi-gear me-1"></i>Ações
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="p : ${profiles}">
+                                    <td class="px-4 fw-semibold text-muted" th:text="${p.id}">1</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-instagram text-danger me-2"></i>
+                                            <span class="fw-semibold" th:text="${p.username}">username</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${p.displayName ?: '-'}">Display Name</td>
+                                    <td class="text-center">
+                                        <span class="badge" 
+                                              th:classappend="${p.active ? 'bg-success' : 'bg-secondary'}"
+                                              th:text="${p.active ? 'Ativo' : 'Inativo'}">
+                                            Ativo
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted" 
+                                               th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                            28/10/2025 14:30
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <form class="d-inline" 
+                                              th:action="@{'/admin/profiles/' + ${p.id} + '/delete'}" 
+                                              method="post"
+                                              th:onsubmit="'return confirm(\'Tem certeza que deseja excluir o perfil ' + ${p.username} + '?\');'">
+                                            <button type="submit" 
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    title="Excluir perfil">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div th:if="${profiles == null or #lists.isEmpty(profiles)}" 
+                         class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum perfil cadastrado</h5>
+                        <p class="text-muted mb-0">
+                            Adicione um perfil do Instagram para começar o monitoramento
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Validation Script -->
+<script>
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+</body>
+</html>

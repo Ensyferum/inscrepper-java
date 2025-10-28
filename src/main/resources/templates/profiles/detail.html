@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Perfil @' + ${profile.username} + ' - Inscrepper'">Perfil - Inscrepper</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-camera-retro me-2"></i>Inscrepper
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/profiles">Perfis</a>
+                <a class="nav-link" href="/admin">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/profiles">Perfis</a></li>
+                <li class="breadcrumb-item active" th:text="'@' + ${profile.username}">@username</li>
+            </ol>
+        </nav>
+
+        <!-- Mensagens de sucesso/erro -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Informações do Perfil -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <h4 th:text="'@' + ${profile.username}">@username</h4>
+                        <p class="text-muted" th:text="${profile.displayName}">Display Name</p>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-success" th:if="${profile.active}">
+                                <i class="fas fa-check me-1"></i>Ativo
+                            </span>
+                            <span class="badge bg-secondary" th:unless="${profile.active}">
+                                <i class="fas fa-pause me-1"></i>Inativo
+                            </span>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="d-grid gap-2">
+                            <form th:action="@{/profiles/{id}/scrape(id=${profile.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Confirma executar o scraping? Isso pode levar alguns minutos.')">
+                                    <i class="fas fa-sync-alt me-2"></i>Executar Scraping
+                                </button>
+                            </form>
+                            
+                            <a th:href="@{/profiles/{id}/posts(id=${profile.id})}" class="btn btn-info">
+                                <i class="fas fa-images me-2"></i>Ver Posts
+                            </a>
+                            
+                            <a th:href="@{/profiles/{id}/analytics(id=${profile.id})}" class="btn btn-success">
+                                <i class="fas fa-chart-bar me-2"></i>Analíticos
+                            </a>
+                            
+                            <button class="btn btn-outline-secondary" disabled>
+                                <i class="fas fa-video me-2"></i>Stories (Em breve)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Técnicas -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações</h6>
+                    </div>
+                    <div class="card-body">
+                        <small class="text-muted">
+                            <div class="mb-2">
+                                <strong>ID:</strong> <span th:text="${profile.id}">uuid</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Criado em:</strong> 
+                                <span th:text="${#temporals.format(profile.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2023 10:00</span>
+                            </div>
+                            <div>
+                                <strong>Última atualização:</strong> 
+                                <span th:text="${#temporals.format(profile.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2023 10:00</span>
+                            </div>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas e Conteúdo -->
+            <div class="col-md-8">
+                <!-- Estatísticas -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-primary" th:text="${totalPosts}">0</h3>
+                                <p class="mb-0">Total de Posts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-success" th:text="${postsWithImages}">0</h3>
+                                <p class="mb-0">Posts com Imagem</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-info" th:text="${#numbers.formatDecimal((postsWithImages * 100.0 / (totalPosts > 0 ? totalPosts : 1)), 1, 1)} + '%'">0%</h3>
+                                <p class="mb-0">% com Imagem</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Últimos Posts -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="fas fa-images me-2"></i>Últimos Posts</h6>
+                        <a th:href="@{/profiles/{id}/posts(id=${profile.id})}" class="btn btn-sm btn-outline-primary">Ver Todos</a>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${contents.isEmpty()}" class="text-center py-4">
+                            <i class="fas fa-image fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Nenhum post encontrado. Execute o scraping para capturar posts.</p>
+                        </div>
+                        
+                        <div th:unless="${contents.isEmpty()}" class="row">
+                            <div class="col-md-6 col-lg-4 mb-3" th:each="content, iterStat : ${contents}" th:if="${iterStat.index < 6}">
+                                <div class="card h-100">
+                                    <div th:if="${content.imageBlob != null}" class="position-relative">
+                                        <img th:src="@{/profiles/image/{id}(id=${content.id})}" 
+                                             class="card-img-top" 
+                                             style="height: 200px; object-fit: cover;"
+                                             th:alt="${content.caption}">
+                                    </div>
+                                    <div th:unless="${content.imageBlob != null}" class="bg-light d-flex align-items-center justify-content-center" 
+                                         style="height: 200px;">
+                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    </div>
+                                    
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">
+                                            <div th:if="${content.caption != null and !content.caption.isEmpty()}" 
+                                                 th:text="${content.caption.length() > 50 ? content.caption.substring(0, 50) + '...' : content.caption}">
+                                                Caption
+                                            </div>
+                                            <div class="mt-1">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                <span th:text="${#temporals.format(content.collectedAt, 'dd/MM HH:mm')}">01/01 10:00</span>
+                                            </div>
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="card-footer p-2">
+                                        <a th:href="${content.url}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                            <i class="fab fa-instagram me-1"></i>Ver no Instagram
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

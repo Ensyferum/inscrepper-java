@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Analytics de @' + ${profile.username} + ' - Inscrepper'">Analytics - Inscrepper</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-camera-retro me-2"></i>Inscrepper
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/profiles">Perfis</a>
+                <a class="nav-link" href="/admin">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/profiles">Perfis</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/profiles/{id}(id=${profile.id})}" th:text="'@' + ${profile.username}">@username</a></li>
+                <li class="breadcrumb-item active">Analytics</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-chart-bar me-2"></i>Analytics de <span th:text="'@' + ${profile.username}">@username</span></h2>
+                <p class="text-muted mb-0">Análise dos dados coletados do perfil</p>
+            </div>
+            <div>
+                <a th:href="@{/profiles/{id}(id=${profile.id})}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar ao Perfil
+                </a>
+                <a th:href="@{/profiles/{id}/posts(id=${profile.id})}" class="btn btn-info">
+                    <i class="fas fa-images me-2"></i>Ver Posts
+                </a>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-primary h-100">
+                    <div class="card-body text-center">
+                        <div class="text-primary mb-2">
+                            <i class="fas fa-images fa-2x"></i>
+                        </div>
+                        <h3 class="text-primary" th:text="${totalPosts}">0</h3>
+                        <p class="card-text text-muted mb-0">Total de Posts</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-success h-100">
+                    <div class="card-body text-center">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-photo-video fa-2x"></i>
+                        </div>
+                        <h3 class="text-success" th:text="${postsWithImages}">0</h3>
+                        <p class="card-text text-muted mb-0">Posts com Imagem</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-info h-100">
+                    <div class="card-body text-center">
+                        <div class="text-info mb-2">
+                            <i class="fas fa-percentage fa-2x"></i>
+                        </div>
+                        <h3 class="text-info" th:text="${imagePercentage} + '%'">0%</h3>
+                        <p class="card-text text-muted mb-0">% com Imagem</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-warning h-100">
+                    <div class="card-body text-center">
+                        <div class="text-warning mb-2">
+                            <i class="fas fa-align-left fa-2x"></i>
+                        </div>
+                        <h3 class="text-warning" th:text="${postsWithCaption}">0</h3>
+                        <p class="card-text text-muted mb-0">Posts com Caption</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row">
+            <!-- Gráfico de Pizza - Distribuição de Conteúdo -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Distribuição de Conteúdo</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="contentDistributionChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Pizza - Posts com/sem Caption -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Posts com Caption</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="captionDistributionChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Resumo -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Resumo Detalhado</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Perfil:</strong></td>
+                                        <td th:text="'@' + ${profile.username}">@username</td>
+                                        <td><strong>Nome de Exibição:</strong></td>
+                                        <td th:text="${profile.displayName}">Display Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total de Posts:</strong></td>
+                                        <td th:text="${totalPosts}">0</td>
+                                        <td><strong>Posts com Imagem:</strong></td>
+                                        <td>
+                                            <span th:text="${postsWithImages}">0</span>
+                                            <span class="text-muted">(<span th:text="${imagePercentage}">0</span>%)</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Posts com Caption:</strong></td>
+                                        <td>
+                                            <span th:text="${postsWithCaption}">0</span>
+                                            <span class="text-muted">(<span th:text="${captionPercentage}">0</span>%)</span>
+                                        </td>
+                                        <td><strong>Posts sem Caption:</strong></td>
+                                        <td>
+                                            <span th:text="${totalPosts - postsWithCaption}">0</span>
+                                            <span class="text-muted">(<span th:text="${#numbers.formatDecimal(100 - #numbers.parseDouble(captionPercentage), 1, 1)}">0</span>%)</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status do Perfil:</strong></td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${profile.active}">Ativo</span>
+                                            <span class="badge bg-secondary" th:unless="${profile.active}">Inativo</span>
+                                        </td>
+                                        <td><strong>Criado em:</strong></td>
+                                        <td th:text="${#temporals.format(profile.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2023 10:00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Ações Rápidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <form th:action="@{/profiles/{id}/scrape(id=${profile.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Confirma executar o scraping? Isso pode levar alguns minutos.')">
+                                        <i class="fas fa-sync-alt me-2"></i>Executar Scraping
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a th:href="@{/profiles/{id}/posts(id=${profile.id})}" class="btn btn-info w-100">
+                                    <i class="fas fa-images me-2"></i>Ver Todos os Posts
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-secondary w-100" onclick="window.print()">
+                                    <i class="fas fa-print me-2"></i>Imprimir Relatório
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-success w-100" onclick="exportData()">
+                                    <i class="fas fa-download me-2"></i>Exportar Dados
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        // Dados do servidor
+        const totalPosts = /*[[${totalPosts}]]*/ 0;
+        const postsWithImages = /*[[${postsWithImages}]]*/ 0;
+        const postsWithCaption = /*[[${postsWithCaption}]]*/ 0;
+        const postsWithoutImages = totalPosts - postsWithImages;
+        const postsWithoutCaption = totalPosts - postsWithCaption;
+
+        // Gráfico de Distribuição de Conteúdo (Imagens)
+        const contentCtx = document.getElementById('contentDistributionChart').getContext('2d');
+        new Chart(contentCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Posts com Imagem', 'Posts sem Imagem'],
+                datasets: [{
+                    data: [postsWithImages, postsWithoutImages],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Distribuição de Caption
+        const captionCtx = document.getElementById('captionDistributionChart').getContext('2d');
+        new Chart(captionCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Posts com Caption', 'Posts sem Caption'],
+                datasets: [{
+                    data: [postsWithCaption, postsWithoutCaption],
+                    backgroundColor: ['#ffc107', '#6c757d'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Função para exportar dados (placeholder)
+        function exportData() {
+            const profileUsername = /*[[${profile.username}]]*/ 'profile';
+            
+            const data = {
+                profile: '@' + profileUsername,
+                totalPosts: totalPosts,
+                postsWithImages: postsWithImages,
+                postsWithCaption: postsWithCaption,
+                imagePercentage: /*[[${imagePercentage}]]*/ '0',
+                captionPercentage: /*[[${captionPercentage}]]*/ '0',
+                generatedAt: new Date().toLocaleString('pt-BR')
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'analytics_' + profileUsername + '_' + new Date().toISOString().split('T')[0] + '.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
