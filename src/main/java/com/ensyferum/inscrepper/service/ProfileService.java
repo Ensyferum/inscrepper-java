@@ -62,7 +62,11 @@ public class ProfileService {
     }
     
     public List<Content> scrapeProfile(UUID profileId) {
-        log.info("🚀 Iniciando scraping enhanced para perfil ID: {}", profileId);
+        return scrapeProfile(profileId, false);
+    }
+    
+    public List<Content> scrapeProfile(UUID profileId, boolean forceUpdate) {
+        log.info("🚀 Iniciando scraping enhanced para perfil ID: {} (forceUpdate: {})", profileId, forceUpdate);
         
         Optional<Profile> profileOpt = findById(profileId);
         if (profileOpt.isEmpty()) {
@@ -72,7 +76,7 @@ public class ProfileService {
         Profile profile = profileOpt.get();
         
         try {
-            List<Content> results = enhancedScraper.scrapeAndSaveProfile(profile);
+            List<Content> results = enhancedScraper.scrapeAndSaveProfile(profile, forceUpdate);
             log.info("✅ Scraping concluído para @{}: {} posts", profile.getUsername(), results.size());
             return results;
         } catch (Exception e) {

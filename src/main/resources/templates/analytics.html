@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Analytics - Instagram Scraper</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container mt-4">
+        <h1 class="mb-4">📊 Analytics Dashboard</h1>
+        
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}"></span>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-people-fill"></i>
+                    Perfis Disponíveis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${profiles.empty}" class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Nenhum perfil encontrado. Faça scraping de um perfil primeiro.
+                </div>
+                
+                <div th:unless="${profiles.empty}" class="row">
+                    <div th:each="profile : ${profiles}" class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 shadow-sm hover-shadow">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span th:text="'@' + ${profile.username}">@username</span>
+                                </h5>
+                                <p class="card-text text-muted" th:if="${profile.displayName}">
+                                    <span th:text="${profile.displayName}">Display Name</span>
+                                </p>
+                                <a th:href="@{/analytics/profile/{username}(username=${profile.username})}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-bar-chart-fill"></i>
+                                    Ver Analytics
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-house-fill"></i>
+                Voltar ao Início
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .hover-shadow:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+</style>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{layout/base :: layout (~{::title}, ~{::main})}">
+<head>
+    <title th:text="${post.profile.username + ' - Post'}" >Post - Inscrepper</title>
+</head>
+<body>
+<main>
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/posts">Posts</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Detalhes</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Coluna Principal - Detalhes do Post -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2 class="mb-2">
+                                <span class="badge me-2" 
+                                      th:classappend="${post.type.name() == 'POST'} ? 'bg-primary' : ${post.type.name() == 'REEL'} ? 'bg-danger' : 'bg-warning'">
+                                    <span th:if="${post.type.name() == 'POST'}">📷 Post</span>
+                                    <span th:if="${post.type.name() == 'REEL'}">🎬 Reel</span>
+                                    <span th:if="${post.type.name() == 'STORY'}">⚡ Story</span>
+                                </span>
+                            </h2>
+                            <h5 class="text-muted mb-3">
+                                <i class="bi bi-person-circle text-primary"></i>
+                                <a th:href="@{/profiles/{id}(id=${post.profile.id})}" 
+                                   class="text-decoration-none"
+                                   th:text="${post.profile.username}">
+                                    username
+                                </a>
+                            </h5>
+                        </div>
+                        <div>
+                            <a th:href="${post.url}" 
+                               target="_blank" 
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-instagram me-1"></i>Ver no Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Preview da Imagem -->
+                    <div class="bg-light rounded mb-4 d-flex align-items-center justify-content-center" 
+                         style="height: 400px;">
+                        <div class="text-center">
+                            <i class="bi bi-image fs-1 text-muted d-block mb-2"></i>
+                            <p class="text-muted">Thumbnail não disponível</p>
+                            <a th:href="${post.url}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Ver no Instagram
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Caption -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-chat-square-text me-2"></i>Caption
+                        </h5>
+                        <p class="text-muted" th:text="${post.caption ?: 'Sem caption'}">
+                            Caption do post...
+                        </p>
+                    </div>
+                    
+                    <!-- Métricas Detalhadas -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-heart-fill fs-1 text-danger"></i>
+                                <h3 class="mt-2 mb-0" th:text="${post.likesCount != null ? #numbers.formatInteger(post.likesCount, 0, 'COMMA') : '0'}">0</h3>
+                                <small class="text-muted">Likes</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-chat-fill fs-1 text-success"></i>
+                                <h3 class="mt-2 mb-0" th:text="${post.commentsCount != null ? #numbers.formatInteger(post.commentsCount, 0, 'COMMA') : '0'}">0</h3>
+                                <small class="text-muted">Comentários</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-eye-fill fs-1 text-info"></i>
+                                <h3 class="mt-2 mb-0" th:text="${post.viewsCount != null ? #numbers.formatInteger(post.viewsCount, 0, 'COMMA') : '0'}">0</h3>
+                                <small class="text-muted">Views</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 rounded"
+                                 th:classappend="${engagementRate >= 5} ? 'bg-success text-white' : ${engagementRate >= 2} ? 'bg-warning' : 'bg-secondary text-white'">
+                                <i class="bi bi-graph-up-arrow fs-1"></i>
+                                <h3 class="mt-2 mb-0" th:text="${#numbers.formatDecimal(engagementRate, 1, 2) + '%'}">0%</h3>
+                                <small>Engajamento</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações Adicionais -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <i class="bi bi-link-45deg fs-3 text-primary me-3"></i>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block">ID Externo</small>
+                                    <code th:text="${post.externalId}">ABC123</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <i class="bi bi-calendar3 fs-3 text-primary me-3"></i>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block">Coletado em</small>
+                                    <strong th:text="${#temporals.format(post.collectedAt, 'dd/MM/yyyy HH:mm:ss')}">Data</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white border-0 pb-4">
+                    <div class="d-flex gap-2">
+                        <a href="/posts" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar
+                        </a>
+                        <button type="button" 
+                                class="btn btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteModal">
+                            <i class="bi bi-trash me-1"></i>Deletar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar - Posts Relacionados -->
+        <div class="col-lg-4">
+            <!-- Estatísticas do Perfil -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>Perfil
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h5 th:text="${post.profile.username}">username</h5>
+                    <p class="text-muted small mb-3" th:text="${post.profile.fullName}">Full Name</p>
+                    <div class="d-grid">
+                        <a th:href="@{/profiles/{id}(id=${post.profile.id})}" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i>Ver Perfil Completo
+                        </a>
+                        <a th:href="@{/analytics/profile/{username}(username=${post.profile.username})}" 
+                           class="btn btn-sm btn-outline-success mt-2">
+                            <i class="bi bi-graph-up me-1"></i>Ver Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Posts Relacionados -->
+            <div class="card border-0 shadow-sm" th:if="${not #lists.isEmpty(relatedPosts)}">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-collection me-2"></i>Posts Relacionados
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a th:each="related : ${relatedPosts}"
+                       th:href="@{/posts/{id}(id=${related.id})}"
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0 me-3">
+                                <span class="badge" 
+                                      th:classappend="${related.type.name() == 'POST'} ? 'bg-primary' : ${related.type.name() == 'REEL'} ? 'bg-danger' : 'bg-warning'">
+                                    <span th:if="${related.type.name() == 'POST'}">📷</span>
+                                    <span th:if="${related.type.name() == 'REEL'}">🎬</span>
+                                    <span th:if="${related.type.name() == 'STORY'}">⚡</span>
+                                </span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1 small" 
+                                   th:text="${#strings.abbreviate(related.caption, 50)}"
+                                   style="height: 20px; overflow: hidden;">
+                                    Caption...
+                                </p>
+                                <div class="d-flex gap-3 text-muted" style="font-size: 0.75rem;">
+                                    <span><i class="bi bi-heart-fill text-danger"></i> 
+                                          <span th:text="${related.likesCount ?: 0}">0</span></span>
+                                    <span><i class="bi bi-chat-fill text-success"></i> 
+                                          <span th:text="${related.commentsCount ?: 0}">0</span></span>
+                                    <span><i class="bi bi-eye-fill text-info"></i> 
+                                          <span th:text="${related.viewsCount ?: 0}">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja deletar este post?</p>
+                <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Deletar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

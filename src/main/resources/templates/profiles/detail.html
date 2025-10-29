@@ -66,9 +66,17 @@
 
                         <!-- Botões de Ação -->
                         <div class="d-grid gap-2">
+                            <!-- Enhanced Scraping (Novo) -->
+                            <form th:action="@{/profiles/{id}/scrape-enhanced(id=${profile.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success w-100" onclick="return confirm('🚀 Executar Enhanced Scraping? Esta versão melhorada possui múltiplas estratégias anti-detecção e pode levar mais tempo.')">
+                                    <i class="fas fa-rocket me-2"></i>Enhanced Scraping
+                                </button>
+                            </form>
+                            
+                            <!-- Scraping Original -->
                             <form th:action="@{/profiles/{id}/scrape(id=${profile.id})}" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Confirma executar o scraping? Isso pode levar alguns minutos.')">
-                                    <i class="fas fa-sync-alt me-2"></i>Executar Scraping
+                                <button type="submit" class="btn btn-primary w-100" onclick="return confirm('Executar scraping básico? Pode levar alguns minutos.')">
+                                    <i class="fas fa-sync-alt me-2"></i>Scraping Básico
                                 </button>
                             </form>
                             
@@ -76,7 +84,7 @@
                                 <i class="fas fa-images me-2"></i>Ver Posts
                             </a>
                             
-                            <a th:href="@{/profiles/{id}/analytics(id=${profile.id})}" class="btn btn-success">
+                            <a th:href="@{/profiles/{id}/analytics(id=${profile.id})}" class="btn btn-warning">
                                 <i class="fas fa-chart-bar me-2"></i>Analíticos
                             </a>
                             

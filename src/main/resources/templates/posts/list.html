@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{layout/base :: layout (~{::title}, ~{::main})}">
+<head>
+    <title>Posts - Inscrepper</title>
+</head>
+<body>
+<main>
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-grid-3x3-gap me-2"></i>Posts
+            </h1>
+            <p class="text-muted">Navegue e analise todos os posts coletados</p>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="row mb-4" th:if="${stats}">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-collection fs-1 text-primary"></i>
+                    <h3 class="mt-2 mb-0" th:text="${stats.totalPosts}">0</h3>
+                    <p class="text-muted mb-0">Total Posts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-heart-fill fs-1 text-danger"></i>
+                    <h3 class="mt-2 mb-0" th:text="${#numbers.formatInteger(stats.totalLikes, 0, 'COMMA')}">0</h3>
+                    <p class="text-muted mb-0">Total Likes</p>
+                    <small class="text-muted" th:text="'Média: ' + ${#numbers.formatDecimal(stats.avgLikes, 0, 1)}">Média: 0</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-chat-fill fs-1 text-success"></i>
+                    <h3 class="mt-2 mb-0" th:text="${#numbers.formatInteger(stats.totalComments, 0, 'COMMA')}">0</h3>
+                    <p class="text-muted mb-0">Total Comentários</p>
+                    <small class="text-muted" th:text="'Média: ' + ${#numbers.formatDecimal(stats.avgComments, 0, 1)}">Média: 0</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-eye-fill fs-1 text-info"></i>
+                    <h3 class="mt-2 mb-0" th:text="${#numbers.formatInteger(stats.totalViews, 0, 'COMMA')}">0</h3>
+                    <p class="text-muted mb-0">Total Views</p>
+                    <small class="text-muted" th:text="'Média: ' + ${#numbers.formatDecimal(stats.avgViews, 0, 1)}">Média: 0</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="/posts" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-person-circle me-1"></i>Perfil
+                    </label>
+                    <select name="profile" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos os perfis</option>
+                        <option th:each="p : ${profiles}" 
+                                th:value="${p.username}" 
+                                th:text="${p.username}"
+                                th:selected="${p.username == selectedProfile}">
+                            Profile
+                        </option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-collection me-1"></i>Tipo
+                    </label>
+                    <select name="type" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos os tipos</option>
+                        <option value="POST" th:selected="${selectedType == 'POST'}">📷 Post</option>
+                        <option value="REEL" th:selected="${selectedType == 'REEL'}">🎬 Reel</option>
+                        <option value="STORY" th:selected="${selectedType == 'STORY'}">⚡ Story</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-sort-down me-1"></i>Ordenar por
+                    </label>
+                    <select name="sort" class="form-select" onchange="this.form.submit()">
+                        <option value="" th:selected="${selectedSort == null or selectedSort == ''}">Mais recentes</option>
+                        <option value="oldest" th:selected="${selectedSort == 'oldest'}">Mais antigos</option>
+                        <option value="likes" th:selected="${selectedSort == 'likes'}">Mais curtidos</option>
+                        <option value="comments" th:selected="${selectedSort == 'comments'}">Mais comentados</option>
+                        <option value="views" th:selected="${selectedSort == 'views'}">Mais visualizados</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                    <a href="/posts" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-x-circle me-1"></i>Limpar
+                    </a>
+                </div>
+                
+                <input type="hidden" name="page" th:value="${currentPage}">
+            </form>
+        </div>
+    </div>
+
+    <!-- Grid de Posts -->
+    <div class="row g-4" th:if="${contentPage.hasContent()}">
+        <div class="col-md-6 col-lg-4" th:each="post : ${contentPage.content}">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <!-- Badge de Tipo -->
+                <div class="position-absolute top-0 start-0 m-3">
+                    <span class="badge" 
+                          th:classappend="${post.type.name() == 'POST'} ? 'bg-primary' : ${post.type.name() == 'REEL'} ? 'bg-danger' : 'bg-warning'">
+                        <span th:if="${post.type.name() == 'POST'}">📷 Post</span>
+                        <span th:if="${post.type.name() == 'REEL'}">🎬 Reel</span>
+                        <span th:if="${post.type.name() == 'STORY'}">⚡ Story</span>
+                    </span>
+                </div>
+                
+                <!-- Thumbnail ou Placeholder -->
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                     style="height: 300px; overflow: hidden;">
+                    <i class="bi bi-image fs-1 text-muted"></i>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Perfil -->
+                    <h6 class="card-subtitle mb-2">
+                        <i class="bi bi-person-circle text-primary"></i>
+                        <a th:href="@{/profiles/{id}(id=${post.profile.id})}" 
+                           class="text-decoration-none"
+                           th:text="${post.profile.username}">
+                            username
+                        </a>
+                    </h6>
+                    
+                    <!-- Caption -->
+                    <p class="card-text text-muted small mb-3" 
+                       th:text="${#strings.abbreviate(post.caption, 100)}"
+                       style="height: 60px; overflow: hidden;">
+                        Caption do post...
+                    </p>
+                    
+                    <!-- Métricas -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-4 text-center">
+                            <small class="d-block text-muted">
+                                <i class="bi bi-heart-fill text-danger"></i>
+                            </small>
+                            <strong th:text="${post.likesCount != null ? #numbers.formatInteger(post.likesCount, 0, 'COMMA') : '0'}">0</strong>
+                        </div>
+                        <div class="col-4 text-center">
+                            <small class="d-block text-muted">
+                                <i class="bi bi-chat-fill text-success"></i>
+                            </small>
+                            <strong th:text="${post.commentsCount != null ? #numbers.formatInteger(post.commentsCount, 0, 'COMMA') : '0'}">0</strong>
+                        </div>
+                        <div class="col-4 text-center">
+                            <small class="d-block text-muted">
+                                <i class="bi bi-eye-fill text-info"></i>
+                            </small>
+                            <strong th:text="${post.viewsCount != null ? #numbers.formatInteger(post.viewsCount, 0, 'COMMA') : '0'}">0</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Data -->
+                    <small class="text-muted d-block mb-3">
+                        <i class="bi bi-calendar3"></i>
+                        <span th:text="${#temporals.format(post.collectedAt, 'dd/MM/yyyy HH:mm')}">Data</span>
+                    </small>
+                    
+                    <!-- Ações -->
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/posts/{id}(id=${post.id})}" 
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye me-1"></i>Ver Detalhes
+                        </a>
+                        <a th:href="${post.url}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-instagram me-1"></i>Ver no Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensagem quando não há posts -->
+    <div class="alert alert-info text-center" th:unless="${contentPage.hasContent()}">
+        <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+        <h5>Nenhum post encontrado</h5>
+        <p class="mb-0">Tente ajustar os filtros ou adicione novos perfis para coletar posts.</p>
+    </div>
+
+    <!-- Paginação -->
+    <nav th:if="${contentPage.hasContent() and totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <!-- Primeira página -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" 
+                   th:href="@{/posts(page=0, profile=${selectedProfile}, type=${selectedType}, sort=${selectedSort})}">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+            
+            <!-- Página anterior -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" 
+                   th:href="@{/posts(page=${currentPage - 1}, profile=${selectedProfile}, type=${selectedType}, sort=${selectedSort})}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            
+            <!-- Páginas -->
+            <li class="page-item" 
+                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" 
+                   th:href="@{/posts(page=${i}, profile=${selectedProfile}, type=${selectedType}, sort=${selectedSort})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            
+            <!-- Próxima página -->
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" 
+                   th:href="@{/posts(page=${currentPage + 1}, profile=${selectedProfile}, type=${selectedType}, sort=${selectedSort})}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            
+            <!-- Última página -->
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link" 
+                   th:href="@{/posts(page=${totalPages - 1}, profile=${selectedProfile}, type=${selectedType}, sort=${selectedSort})}">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+        </ul>
+        
+        <p class="text-center text-muted">
+            Mostrando página <strong th:text="${currentPage + 1}">1</strong> de <strong th:text="${totalPages}">1</strong>
+            | Total: <strong th:text="${totalElements}">0</strong> posts
+        </p>
+    </nav>
+</main>
+
+<style>
+.hover-lift {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+</body>
+</html>

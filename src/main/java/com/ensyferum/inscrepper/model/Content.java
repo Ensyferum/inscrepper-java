@@ -60,6 +60,13 @@ public class Content {
     @Column(length = 100)
     private String imageMimeType;
 
+    // Métricas de engajamento
+    private Long likesCount;
+    
+    private Long commentsCount;
+    
+    private Long viewsCount;
+
     @PrePersist
     public void prePersist() {
         if (collectedAt == null) {

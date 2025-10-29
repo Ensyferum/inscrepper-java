@@ -94,11 +94,22 @@
                     <!-- Conteúdo do Card -->
                     <div class="card-body">
                         <!-- Caption -->
-                        <div th:if="${content.caption != null and !content.caption.isEmpty()}" class="mb-2">
-                            <small class="text-muted">
-                                <span th:text="${content.caption.length() > 100 ? content.caption.substring(0, 100) + '...' : content.caption}">
+                        <div th:if="${content.caption != null and !content.caption.isEmpty() and !content.caption.equals('Sem descrição disponível')}" class="mb-3">
+                            <div class="border-start border-primary ps-3 py-2 bg-light rounded-end">
+                                <i class="fas fa-quote-left text-primary me-2"></i>
+                                <span class="fw-normal" th:text="${content.caption.length() > 150 ? content.caption.substring(0, 150) + '...' : content.caption}">
                                     Caption do post
                                 </span>
+                                <small th:if="${content.caption.length() > 150}" class="d-block mt-1 text-muted">
+                                    <i class="fas fa-expand-alt me-1"></i>Caption truncado - clique para ver completo
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador quando não há caption -->
+                        <div th:if="${content.caption == null or content.caption.isEmpty() or content.caption.equals('Sem descrição disponível')}" class="mb-2">
+                            <small class="text-muted fst-italic">
+                                <i class="fas fa-comment-slash me-1"></i>Sem descrição disponível
                             </small>
                         </div>
                         

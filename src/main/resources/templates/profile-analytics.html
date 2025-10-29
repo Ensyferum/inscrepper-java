@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="'Analytics - @' + ${profile.username}">Analytics - Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="mb-2">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    Analytics: <span th:text="'@' + ${profile.username}">@username</span>
+                </h1>
+                <p class="text-muted" th:if="${profile.displayName}">
+                    <span th:text="${profile.displayName}">Display Name</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-primary h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Total Posts</h6>
+                                <h2 class="mb-0" th:text="${totalContents}">0</h2>
+                            </div>
+                            <i class="bi bi-file-post display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-danger h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">❤️ Total Likes</h6>
+                                <h2 class="mb-0" th:text="${#numbers.formatInteger(totalLikes, 0, 'COMMA')}">0</h2>
+                                <small th:text="'Média: ' + ${#numbers.formatDecimal(avgLikes, 0, 'COMMA', 1, 'POINT')}">Média: 0</small>
+                            </div>
+                            <i class="bi bi-heart-fill display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">💬 Total Comentários</h6>
+                                <h2 class="mb-0" th:text="${#numbers.formatInteger(totalComments, 0, 'COMMA')}">0</h2>
+                                <small th:text="'Média: ' + ${#numbers.formatDecimal(avgComments, 0, 'COMMA', 1, 'POINT')}">Média: 0</small>
+                            </div>
+                            <i class="bi bi-chat-fill display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">👁️ Total Views</h6>
+                                <h2 class="mb-0" th:text="${#numbers.formatInteger(totalViews, 0, 'COMMA')}">0</h2>
+                                <small th:text="'Média: ' + ${#numbers.formatDecimal(avgViews, 0, 'COMMA', 1, 'POINT')}">Média: 0</small>
+                            </div>
+                            <i class="bi bi-eye-fill display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-graph-up"></i>
+                            Engajamento por Post
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart-fill"></i>
+                            Distribuição de Métricas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabela de Posts -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table"></i>
+                            Detalhes dos Posts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tipo</th>
+                                        <th>Caption</th>
+                                        <th class="text-end">❤️ Likes</th>
+                                        <th class="text-end">💬 Comentários</th>
+                                        <th class="text-end">👁️ Views</th>
+                                        <th class="text-end">Taxa Eng.</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="content : ${contents}">
+                                        <td>
+                                            <code th:text="${content.externalId}">ABC123</code>
+                                        </td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${content.type.toString() == 'REEL' ? 'bg-primary' : 'bg-secondary'}"
+                                                  th:text="${content.type}">TYPE</span>
+                                        </td>
+                                        <td>
+                                            <div class="text-truncate" style="max-width: 300px;" 
+                                                 th:text="${content.caption}" 
+                                                 th:title="${content.caption}">
+                                                Caption preview...
+                                            </div>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong th:text="${#numbers.formatInteger(content.likesCount ?: 0, 0, 'COMMA')}">0</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong th:text="${#numbers.formatInteger(content.commentsCount ?: 0, 0, 'COMMA')}">0</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong th:text="${#numbers.formatInteger(content.viewsCount ?: 0, 0, 'COMMA')}">0</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <span th:with="rate=${content.viewsCount > 0 ? (content.likesCount * 100.0 / content.viewsCount) : 0}">
+                                                <span class="badge" 
+                                                      th:classappend="${rate >= 5 ? 'bg-success' : rate >= 2 ? 'bg-warning' : 'bg-secondary'}"
+                                                      th:text="${#numbers.formatDecimal(rate, 0, 'COMMA', 1, 'POINT') + '%'}">0%</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a th:href="${content.url}" target="_blank" class="btn btn-sm btn-outline-primary" title="Ver no Instagram">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botões de Navegação -->
+        <div class="mt-4 mb-4">
+            <a href="/analytics" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Voltar para Analytics
+            </a>
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-house-fill"></i>
+                Início
+            </a>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Dados do servidor
+    const username = /*[[${profile.username}]]*/ 'username';
+    
+    // Carregar dados dos gráficos
+    fetch(`/api/analytics/profile/${username}/chart-data`)
+        .then(response => response.json())
+        .then(data => {
+            createEngagementChart(data);
+            createDistributionChart(data);
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+    
+    function createEngagementChart(data) {
+        const ctx = document.getElementById('engagementChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: '❤️ Likes',
+                        data: data.likes,
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '💬 Comentários',
+                        data: data.comments,
+                        backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                        borderColor: 'rgba(25, 135, 84, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '👁️ Views',
+                        data: data.views,
+                        backgroundColor: 'rgba(13, 202, 240, 0.7)',
+                        borderColor: 'rgba(13, 202, 240, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createDistributionChart(data) {
+        const ctx = document.getElementById('distributionChart').getContext('2d');
+        
+        const totalLikes = data.likes.reduce((a, b) => a + b, 0);
+        const totalComments = data.comments.reduce((a, b) => a + b, 0);
+        const totalViews = data.views.reduce((a, b) => a + b, 0);
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['❤️ Likes', '💬 Comentários', '👁️ Views'],
+                datasets: [{
+                    data: [totalLikes, totalComments, totalViews],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(25, 135, 84, 0.7)',
+                        'rgba(13, 202, 240, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(25, 135, 84, 1)',
+                        'rgba(13, 202, 240, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed.toLocaleString();
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<style>
+    .table th {
+        white-space: nowrap;
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    canvas {
+        max-height: 400px;
+    }
+</style>
+</body>
+</html>
