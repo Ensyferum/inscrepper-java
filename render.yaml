@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: inscrepper-java
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      # Perfil de execução
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Bind explícito à porta do Render (Docker Web Services usam a 10000)
+      - key: SERVER_PORT
+        value: "10000"
+      # Opções de memória/GC (ajuste conforme o plano do Render)
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75.0
+      # Scraper em modo headless (Chromium)
+      - key: SCRAPER_HEADLESS
+        value: "true"
+      # Desabilita H2 Console em produção
+      - key: SPRING_H2_CONSOLE_ENABLED
+        value: "false"
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 2

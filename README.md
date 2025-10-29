@@ -51,19 +51,64 @@ java -jar target/inscrepper-java-1.0.0.jar
 
 ### Docker
 ```bash
-# 1. Build da aplicação
-mvn clean package -DskipTests
-
-# 2. Build da imagem Docker
+# Build multi-stage (sem precisar do target/ local)
 docker build -t inscrepper-java:latest .
 
-# 3. Execução do container
+# Execução do container
 docker run -d -p 8080:8080 \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/logs:/app/logs \
-  --name inscrepper \
+  --name inscrepper-java \
   inscrepper-java:latest
 ```
+
+### Deploy no Render (Docker)
+
+Este repositório já contém um `Dockerfile` multi-stage. O Render compila a aplicação durante o `docker build` e executa a imagem final.
+
+Passos rápidos:
+1. Conecte o repositório ao Render e crie um novo Web Service
+2. Selecione “Environment: Docker”
+3. Porta: `8080` (Render detecta automaticamente)
+4. Defina variáveis de ambiente (opcional):
+   - `SPRING_PROFILES_ACTIVE=prod`
+   - `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75.0` (ajusta memória)
+   - `SCRAPER_HEADLESS=true` (mantém scraping em headless)
+5. Opcional: adicione discos persistentes para dados e logs:
+   - Mount `/app/data` (1 GB ou mais)
+   - Mount `/app/logs` (1 GB ou mais)
+
+Health Check: `/` (Home) ou `/h2-console` desabilitado em produção.
+
+Render via arquivo `render.yaml` (opcional):
+
+```yaml
+services:
+  - type: web
+    name: inscrepper-java
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75.0
+      - key: SCRAPER_HEADLESS
+        value: "true"
+    healthCheckPath: /
+    disks:
+      - name: data
+        mountPath: /app/data
+        sizeGB: 1
+      - name: logs
+        mountPath: /app/logs
+        sizeGB: 1
+```
+
+> Dica: o `.dockerignore` já está configurado para enviar apenas o essencial (pom.xml e src/) ao build no Render, acelerando o deploy.
 
 ## 📁 Estrutura do Projeto
 

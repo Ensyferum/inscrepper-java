@@ -1,0 +1,24 @@
+# Reduce Docker build context and speed up builds
+# Only Dockerfile, pom.xml and src/ are required for the multi-stage build
+
+# Maven build output
+/target/
+
+# Local data and logs (mounted as volumes/disks in prod)
+/data/
+/logs/
+
+# VCS / tooling
+/.git/
+/.github/
+/.idea/
+/.vscode/
+*.iml
+.DS_Store
+
+# Misc
+/node_modules/
+/tmp/
+/build/
+/out/
+**/*.log
